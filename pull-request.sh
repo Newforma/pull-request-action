@@ -47,11 +47,11 @@ create_pull_request() {
     # JSON strings
     SOURCE="$(echo -n "${1}" | jq --raw-input --slurp ".")"  # from this branch
     TARGET="$(echo -n "${2}" | jq --raw-input --slurp ".")"  # pull request TO this target
-    BODY="$(echo -n "${3}" | jq --raw-input --slurp ".")"    # this is the content of the message
-    TITLE="$(echo -n "${4}" | jq --raw-input --slurp ".")"   # pull request title
+    BODY="Auto code reconciliation from ${SOURCE} to ${TARGET}"    # this is the content of the message
+    TITLE="Auto code reconciliation"   # pull request title
 
     # JSON boolean
-    if [[ "${5}" ==  "true" ]]; then                         # if PRs are draft
+    if [[ "${3}" ==  "true" ]]; then                         # if PRs are draft
       DRAFT="true";
     else
       DRAFT="false";
@@ -73,9 +73,15 @@ create_pull_request() {
         # Post the pull request
         DATA="{\"title\":${TITLE}, \"body\":${BODY}, \"base\":${TARGET}, \"head\":${SOURCE}, \"draft\":${DRAFT}}"
         echo "curl --user ${GITHUB_ACTOR} -X POST --data ${DATA} ${PULLS_URL}"
-        curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" --user "${GITHUB_ACTOR}" -X POST --data "${DATA}" ${PULLS_URL}
-        echo $?
+        RESPONSE=$(curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" --user "${GITHUB_ACTOR}" -X POST --data "${DATA}" ${PULLS_URL})
+        echo RESPONSE
     fi
+
+    LABELS="{\"labels\":[\"autorebase\"]"
+    PR_NUMBER=$(echo "${RESPONSE}" | jq --raw-output '.[] | .number')
+    LABELS_URL="${REPO_URL}/issues/${PR_NUMBER}/labels"
+
+    curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" --user "${GITHUB_ACTOR}" -X POST --data "${LABELS}" ${LABELS_URL}
 }
 
 
@@ -122,21 +128,7 @@ main () {
             # Ensure we have a GitHub token
             check_credentials
 
-            # Pull request body (optional)
-            if [ -z "${PULL_REQUEST_BODY}" ]; then
-                echo "No pull request body is set, will use default."
-                PULL_REQUEST_BODY="This is an automated pull request to update the container collection ${BRANCH}"
-            fi
-            echo "Pull request body is ${PULL_REQUEST_BODY}"
-
-            # Pull request title (optional)
-            if [ -z "${PULL_REQUEST_TITLE}" ]; then
-                echo "No pull request title is set, will use default."
-                PULL_REQUEST_TITLE="Update container ${BRANCH}"
-            fi
-            echo "Pull request title is ${PULL_REQUEST_TITLE}"
-
-            create_pull_request "${BRANCH}" "${PULL_REQUEST_BRANCH}" "${PULL_REQUEST_BODY}" "${PULL_REQUEST_TITLE}" "${PULL_REQUEST_DRAFT}"
+            create_pull_request "${BRANCH}" "${PULL_REQUEST_BRANCH}" "${PULL_REQUEST_DRAFT}"
 
         fi
 
