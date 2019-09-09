@@ -50,6 +50,9 @@ create_pull_request() {
     BODY="Auto code reconciliation from \"${SOURCE}\" to \"${TARGET}\""    # this is the content of the message
     TITLE="Auto code reconciliation"   # pull request title
 
+    SOURCE=$(echo ${SOURCE} | sed -e "s/\"//g")
+    TARGET=$(echo ${TARGET} | sed -e "s/\"//g")
+
     # Check if the branch already has a pull request open
 
     DATA="{\"base\":${TARGET}, \"head\":${SOURCE}, \"body\":${BODY}}"
