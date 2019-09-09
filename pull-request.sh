@@ -59,11 +59,14 @@ create_pull_request() {
 
     # Check if the branch already has a pull request open
 
-    DATA="{\"title\":${TITLE}, \"body\":${BODY}, \"base\":\"${TARGET}\", \"head\":\"${SOURCE}\", \"draft\":${DRAFT}}"
+    DATA="{\"title\":${TITLE}, \"body\":${BODY}, \"base\":${TARGET}, \"head\":${SOURCE}, \"draft\":${DRAFT}}"
+    CURL_GET_REQUEST="curl -sSL -H \"${AUTH_HEADER}\" -H \"${HEADER}\" -X GET --data \"${DATA}\" ${PULLS_URL}"
+    CURL_POST_REQUEST="curl -sSL -H \"${AUTH_HEADER}\" -H \"${HEADER}\" -X POST --data \"${DATA}\" ${PULLS_URL}"
 
     echo "Getting Existing PRs:"
-    echo "curl -sSL -H \"${AUTH_HEADER}\" -H \"${HEADER}\" -X GET --data \"${DATA}\" ${PULLS_URL}"
-    RESPONSE=$(curl -sSL -H \"${AUTH_HEADER}\" -H \"${HEADER}\" -X GET --data \"${DATA}\" ${PULLS_URL})
+    echo $CURL_GET_REQUEST
+    RESPONSE=$("${CURL_GET_REQUEST}")
+
     PR=$(echo "${RESPONSE}" | jq --raw-output '.[] | .head.ref')
     echo "Response ref: ${PR}"
 
@@ -75,8 +78,8 @@ create_pull_request() {
     else
         # Post the pull request
         echo "Creating Pull Request:"
-        echo "curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" -X POST --data "${DATA}" ${PULLS_URL}"
-        RESPONSE=$(curl -sSL -H \"${AUTH_HEADER}\" -H \"${HEADER}\" -X POST --data \"${DATA}\" ${PULLS_URL})
+        echo $CURL_POST_REQUEST
+        RESPONSE=$("${CURL_POST_REQUEST}")
         echo "PR Creation Response: ${RESPONSE}"
     fi
 
