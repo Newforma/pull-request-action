@@ -64,7 +64,7 @@ create_pull_request() {
     CURL_POST_REQUEST="curl -sSL -H \"${AUTH_HEADER}\" -H \"${HEADER}\" -X POST --data \"${DATA}\" ${PULLS_URL}"
 
     echo "Getting Existing PRs:"
-    echo $CURL_GET_REQUEST
+    echo "$CURL_GET_REQUEST"
     RESPONSE=$("${CURL_GET_REQUEST}")
 
     PR=$(echo "${RESPONSE}" | jq --raw-output '.[] | .head.ref')
@@ -78,7 +78,7 @@ create_pull_request() {
     else
         # Post the pull request
         echo "Creating Pull Request:"
-        echo $CURL_POST_REQUEST
+        echo "$CURL_POST_REQUEST"
         RESPONSE=$("${CURL_POST_REQUEST}")
         echo "PR Creation Response: ${RESPONSE}"
     fi
