@@ -53,6 +53,8 @@ create_pull_request() {
     SOURCE=$(echo ${SOURCE} | sed -e "s/\"//g")
     TARGET=$(echo ${TARGET} | sed -e "s/\"//g")
 
+    DRAFT=false
+
     # Check if the branch already has a pull request open
 
     DATA="{\"base\":${TARGET}, \"head\":${SOURCE}, \"body\":${BODY}}"
@@ -75,7 +77,7 @@ create_pull_request() {
         # Post the pull request
         echo "Creating Pull Request:"
         echo "$CURL_POST_REQUEST"
-        DATA="{\"title\":${TITLE}, \"body\":${BODY}, \"base\":${TARGET}, \"head\":${SOURCE}"
+        DATA="{\"title\":\"${TITLE}\", \"body\":\"${BODY}\", \"base\":\"${TARGET}\", \"head\":\"${SOURCE}\", \"draft\":${DRAFT}}"
         RESPONSE=$(curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" -X POST --data "${DATA}" ${PULLS_URL})
         echo "PR Creation Response: ${RESPONSE}"
     fi
