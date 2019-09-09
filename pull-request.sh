@@ -47,7 +47,7 @@ create_pull_request() {
     # JSON strings
     SOURCE="$(echo -n "${1}" | jq --raw-output --raw-input --slurp ".")"  # from this branch
     TARGET="$(echo -n "${2}" | jq --raw-output --raw-input --slurp ".")"  # pull request TO this target
-    BODY="Auto code reconciliation from \"${SOURCE}\" to \"${TARGET}\""    # this is the content of the message
+    BODY="Auto code reconciliation"    # this is the content of the message
     TITLE="Auto code reconciliation"   # pull request title
 
     SOURCE=$(echo ${SOURCE} | sed -e "s/\"//g")
