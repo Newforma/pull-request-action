@@ -45,8 +45,8 @@ check_events_json() {
 create_pull_request() {
 
     # JSON strings
-    SOURCE="$(echo -n "${1}" | jq --raw-output --slurp ".")"  # from this branch
-    TARGET="$(echo -n "${2}" | jq --raw-output --slurp ".")"  # pull request TO this target
+    SOURCE="$(echo -n "${1}" | jq --raw-output --raw-input --slurp ".")"  # from this branch
+    TARGET="$(echo -n "${2}" | jq --raw-output --raw-input --slurp ".")"  # pull request TO this target
     BODY="Auto code reconciliation from \"${SOURCE}\" to \"${TARGET}\""    # this is the content of the message
     TITLE="Auto code reconciliation"   # pull request title
 
@@ -72,7 +72,7 @@ create_pull_request() {
         # Post the pull request
         echo "Creating Pull Request:"
         echo "$CURL_POST_REQUEST"
-        DATA="{\"title\":${TITLE}, \"body\":${BODY}, \"base\":${TARGET}, \"head\":${SOURCE}, \"draft\":${DRAFT}}"
+        DATA="{\"title\":${TITLE}, \"body\":${BODY}, \"base\":${TARGET}, \"head\":${SOURCE}"
         RESPONSE=$(curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" -X POST --data "${DATA}" ${PULLS_URL})
         echo "PR Creation Response: ${RESPONSE}"
     fi
@@ -104,14 +104,6 @@ main () {
     fi
     echo "Pull requests will go to ${PULL_REQUEST_BRANCH}"
 
-    if [ -z "${PULL_REQUEST_DRAFT}" ]; then
-        echo "No explicit preference for draft PR: created PRs will be normal PRs."
-        PULL_REQUEST_DRAFT="false"
-    else
-        echo "Environment variable PULL_REQUEST_DRAFT set to a value: created PRs will be draft PRs."
-        PULL_REQUEST_DRAFT="true"
-    fi
-
     # Get the name of the action that was triggered
     BRANCH=$(jq --raw-output .ref "${GITHUB_EVENT_PATH}");
     BRANCH=$(echo "${BRANCH/refs\/heads\//}")
@@ -128,7 +120,7 @@ main () {
             # Ensure we have a GitHub token
             check_credentials
 
-            create_pull_request "${BRANCH}" "${PULL_REQUEST_BRANCH}" "${PULL_REQUEST_DRAFT}"
+            create_pull_request "${BRANCH}" "${PULL_REQUEST_BRANCH}"
 
         fi
 
