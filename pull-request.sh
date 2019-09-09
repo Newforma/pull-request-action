@@ -82,8 +82,8 @@ create_pull_request() {
         echo "PR Creation Response: ${RESPONSE}"
     fi
 
-    LABELS="{\"labels\":[\"autorebase\"]"
-    PR_NUMBER=$(echo "${RESPONSE}" | jq --raw-output '.[] | .number')
+    LABELS="{\"labels\":[\"autorebase\"]}"
+    PR_NUMBER=$(echo "${RESPONSE}" | jq --raw-output '.number')
     LABELS_URL="${REPO_URL}/issues/${PR_NUMBER}/labels"
 
     curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" -X POST --data "${LABELS}" ${LABELS_URL}
