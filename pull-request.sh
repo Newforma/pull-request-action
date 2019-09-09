@@ -59,11 +59,11 @@ create_pull_request() {
 
     # Check if the branch already has a pull request open
 
-    DATA="{\"base\":${TARGET}, \"head\":${SOURCE}, \"body\":${BODY}}"
+    DATA="{\"title\":\"${TITLE}\", \"body\":\"${BODY}\", \"base\":\"${TARGET}\", \"head\":\"${SOURCE}\", \"draft\":${DRAFT}}"
 
     echo "Getting Existing PRs:"
-    echo "curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" --user "${GITHUB_ACTOR}" -X GET --data "${DATA}" ${PULLS_URL}"
-    RESPONSE=$(curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" --user "${GITHUB_ACTOR}" -X GET --data "${DATA}" ${PULLS_URL})
+    echo "curl -sSL -H \"${AUTH_HEADER}\" -H \"${HEADER}\" -X GET --data \"${DATA}\" ${PULLS_URL}"
+    RESPONSE=$(curl -sSL -H \"${AUTH_HEADER}\" -H \"${HEADER}\" -X GET --data \"${DATA}\" ${PULLS_URL})
     PR=$(echo "${RESPONSE}" | jq --raw-output '.[] | .head.ref')
     echo "Response ref: ${PR}"
 
@@ -74,18 +74,17 @@ create_pull_request() {
     # Option 2: Open a new pull request
     else
         # Post the pull request
-        DATA="{\"title\":${TITLE}, \"body\":${BODY}, \"base\":${TARGET}, \"head\":${SOURCE}, \"draft\":${DRAFT}}"
         echo "Creating Pull Request:"
-        echo "curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" --user "${GITHUB_ACTOR}" -X POST --data "${DATA}" ${PULLS_URL}"
-        RESPONSE=$(curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" --user "${GITHUB_ACTOR}" -X POST --data "${DATA}" ${PULLS_URL})
-        echo RESPONSE
+        echo "curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" -X POST --data "${DATA}" ${PULLS_URL}"
+        RESPONSE=$(curl -sSL -H \"${AUTH_HEADER}\" -H \"${HEADER}\" -X POST --data \"${DATA}\" ${PULLS_URL})
+        echo "PR Creation Response: ${RESPONSE}"
     fi
 
     LABELS="{\"labels\":[\"autorebase\"]"
     PR_NUMBER=$(echo "${RESPONSE}" | jq --raw-output '.[] | .number')
     LABELS_URL="${REPO_URL}/issues/${PR_NUMBER}/labels"
 
-    curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" --user "${GITHUB_ACTOR}" -X POST --data "${LABELS}" ${LABELS_URL}
+    curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" -X POST --data "${LABELS}" ${LABELS_URL}
 }
 
 
