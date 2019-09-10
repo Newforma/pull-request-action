@@ -82,11 +82,26 @@ create_pull_request() {
         echo "PR Creation Response: ${RESPONSE}"
     fi
 
-    LABELS="{\"labels\":[\"autorebase\"]}"
+    # Assign the automerge label
+    LABELS="{\"labels\":[\"automerge\"]}"
     PR_NUMBER=$(echo "${RESPONSE}" | jq --raw-output '.number')
     LABELS_URL="${REPO_URL}/issues/${PR_NUMBER}/labels"
 
     curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" -X POST --data "${LABELS}" ${LABELS_URL}
+
+    #Get the pull request
+    RESPONSE=$(curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" -X GET --data "${DATA}" ${PULLS_URL})
+
+    AUTOMERGE_LABEL=$(echo "${RESPONSE}" | jq --raw-output '.labels[0]')
+
+    if [[ "${AUTOMERGE_LABEL}" == "automerge" ]]; then
+        echo "Pull Request correctly tagged with ${AUTOMERGE_LABEL}"
+
+        #Merge only when the label has 'automerge'
+        PULLS_MERGE_URL="${PULLS_URL}/${PR_NUMBER}/merge"
+        PULLS_MERGE_DATA="{\"merge_method\":\"merge\"}"
+        curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" -X POST --data "${PULLS_MERGE_DATA}" ${PULLS_MERGE_URL}
+    fi
 }
 
 
