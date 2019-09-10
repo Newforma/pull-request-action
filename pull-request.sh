@@ -11,6 +11,7 @@ set -o pipefail
 API_VERSION=v3
 BASE=https://api.github.com
 AUTH_HEADER="Authorization: token ${GITHUB_TOKEN}"
+BUILD_USER_AUTH_HEADER="Authorization: token ${BUILDUSER_TOKEN}"
 HEADER="Accept: application/vnd.github.${API_VERSION}+json"
 HEADER="${HEADER}; application/vnd.github.antiope-preview+json; application/vnd.github.shadow-cat-preview+json"
 
@@ -93,7 +94,7 @@ create_pull_request() {
     PR_REVIEW_URL="${PULLS_URL}/${PR_NUMBER}/reviews"
     echo "Approving PR: ${PR_REVIEW_URL}"
     PR_REVIEW_DATA="{\"event\":\"APPROVE\"}"
-    RESPONSE=$(curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" -X POST --data "${PR_REVIEW_DATA}" ${PR_REVIEW_URL})
+    RESPONSE=$(curl -sSL -H "${BUILD_USER_AUTH_HEADER}" -H "${HEADER}" -X POST --data "${PR_REVIEW_DATA}" ${PR_REVIEW_URL})
     echo "PR Approval Response: ${RESPONSE}"
 
     # Merge the PR
