@@ -100,8 +100,7 @@ create_pull_request() {
     # Merge the PR
     PULLS_MERGE_URL="${PULLS_URL}/${PR_NUMBER}/merge"
     echo "Merging PR ${PR_NUMBER}: ${PULLS_MERGE_URL}"
-    PULLS_MERGE_DATA="{\"merge_method\":\"merge\"}"
-    RESPONSE=$(curl -sSL -H "${BUILD_USER_AUTH_HEADER}" -H "${HEADER}" -X PUT --data "${PULLS_MERGE_DATA}" ${PULLS_MERGE_URL})
+    RESPONSE=$(curl -sSL -H "${BUILD_USER_AUTH_HEADER}" -H "${HEADER}" -X PUT ${PULLS_MERGE_URL})
     echo "PR Merge Response: ${RESPONSE}"
 }
 
