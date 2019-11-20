@@ -66,7 +66,7 @@ create_pull_request() {
     echo "$CURL_GET_REQUEST"
     RESPONSE=$(curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" -X GET --data "${DATA}" ${PULLS_URL})
 
-    PR=$(echo "${RESPONSE}" | jq --raw-output '.[] | .head.ref')
+    PR=$(echo "${RESPONSE}" | jq --raw-output '.[] | select(.head.ref == "'${SOURCE}'") | .head.ref')
     echo "Response ref: ${PR}"
 
     # Option 1: The pull request is already open
@@ -85,7 +85,7 @@ create_pull_request() {
 
     # Assign the automerge label
     LABELS="{\"labels\":[\"automerge\"]}"
-    PR_NUMBER=$(echo "${RESPONSE}" | jq --raw-output '.number')
+    PR_NUMBER=$(echo "${RESPONSE}" | jq --raw-output '.[] | select(.head.ref == "'${SOURCE}'") | .number')
     LABELS_URL="${REPO_URL}/issues/${PR_NUMBER}/labels"
 
     curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" -X POST --data "${LABELS}" ${LABELS_URL}
