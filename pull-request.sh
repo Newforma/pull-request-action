@@ -58,7 +58,7 @@ create_pull_request() {
 
     # Check if the branch already has a pull request open
 
-    DATA="{\"base\":${TARGET}, \"head\":${SOURCE}, \"body\":${BODY}}"
+    DATA="{\"base\":${TARGET}, \"head\":${SOURCE}}"
     CURL_GET_REQUEST="curl -sSL -H \"${AUTH_HEADER}\" -H \"${HEADER}\" -X GET --data \"${DATA}\" ${PULLS_URL}"
     CURL_POST_REQUEST="curl -sSL -H \"${AUTH_HEADER}\" -H \"${HEADER}\" -X POST --data \"${DATA}\" ${PULLS_URL}"
 
