@@ -133,6 +133,11 @@ main () {
     # Get the name of the action that was triggered
     BRANCH=$(jq --raw-output .ref "${GITHUB_EVENT_PATH}");
     BRANCH=$(echo "${BRANCH/refs\/heads\//}")
+
+    if [[ "${BRANCH}" == "null" ]]; then
+        BRANCH=$BRANCH_PREFIX
+    fi
+
     echo "Found branch $BRANCH"
 
     # If it's to the target branch, ignore it
