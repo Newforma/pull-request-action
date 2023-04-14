@@ -90,24 +90,6 @@ create_pull_request() {
 
     curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" -X POST --data "${LABELS}" ${LABELS_URL}
 
-    # Approve the PR
-    PR_REVIEW_URL="${PULLS_URL}/${PR_NUMBER}/reviews"
-    echo "Approving PR: ${PR_REVIEW_URL}"
-    PR_REVIEW_DATA="{\"event\":\"APPROVE\"}"
-    RESPONSE=$(curl -sSL -H "${BUILD_USER_AUTH_HEADER}" -H "${HEADER}" -X POST --data "${PR_REVIEW_DATA}" ${PR_REVIEW_URL})
-    echo "PR Approval Response: ${RESPONSE}"
-
-    # Merge the PR
-    MERGE_DATA="{\"merge_method\":\"merge\"}"
-    if [[ "crowdin_develop" == "${SOURCE}" ]]; then
-        MERGE_DATA="{\"merge_method\":\"squash\"}"
-    fi
-    
-    PULLS_MERGE_URL="${PULLS_URL}/${PR_NUMBER}/merge"
-    echo "Merging PR ${PR_NUMBER}: ${PULLS_MERGE_URL}"
-    echo "Merge PUT body: ${MERGE_DATA}"
-    RESPONSE=$(curl -sSL -H "${BUILD_USER_AUTH_HEADER}" -H "${HEADER}" -X PUT --data "${MERGE_DATA}" ${PULLS_MERGE_URL})
-    echo "PR Merge Response: ${RESPONSE}"
 }
 
 
