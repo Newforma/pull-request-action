@@ -18,6 +18,7 @@ HEADER="${HEADER}; application/vnd.github.antiope-preview+json; application/vnd.
 # URLs
 REPO_URL="${BASE}/repos/${GITHUB_REPOSITORY}"
 PULLS_URL=$REPO_URL/pulls
+BRANCHES_URL=$REPO_URL/branches
 
 ################################################################################
 # Helper Functions
@@ -40,6 +41,37 @@ check_events_json() {
         exit 1;
     fi
     echo "Found ${GITHUB_EVENT_PATH}";
+
+}
+
+create_branch_for_pr() {
+
+    SOURCE="${1}"
+    ACR_BRANCH="${2}"
+
+    # check if the new branch already exists
+    BRANCH_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" -H "${AUTH_HEADER}" "${BRANCHES_URL}/${ACR_BRANCH}")
+    if [ "${BRANCH_EXISTS}" -eq 200 ]; then
+        echo "Branch ${ACR_BRANCH} already exists."
+        return 0
+    fi
+
+    COMMIT_SHA=$(curl -s -H "${AUTH_HEADER}" "${BRANCHES_URL}/${SOURCE_BRANCH}" | jq -r '.commit.sha')
+
+    # create the new branch using the commit hash of the latest commit on the source branch
+    RESPONSE=$(curl -s -w "\nHTTP status code: %{http_code}\n" -X POST -H "${AUTH_HEADER}" "${REPO_URL}/git/refs" -d "{\"ref\":\"refs/heads/${ACR_BRANCH}\",\"sha\":\"${COMMIT_SHA}\"}")
+    RESPONSE_BODY=$(echo "${RESPONSE}" | sed '$d')
+
+    # check if the response contains any errors
+    ERRORS=$(echo "${RESPONSE_BODY}" | jq -r '.errors')
+    if [ "${ERRORS}" != "null" ]; then
+        echo "Error creating branch ${ACR_BRANCH}:"
+        echo "${RESPONSE_BODY}"
+        return 1
+    fi
+
+    echo "New branch ${ACR_BRANCH} created from ${SOURCE_BRANCH}."
+    return 0
 
 }
 
@@ -133,7 +165,17 @@ main () {
             # Ensure we have a GitHub token
             check_credentials
 
-            create_pull_request "${BRANCH}" "${PULL_REQUEST_BRANCH}"
+            ACR_BRANCH = "acr_develop"
+
+            create_branch_for_pr "${BRANCH}" "${ACR_BRANCH}"
+
+            RETURN=$?
+
+            if [ $RETURN -eq 0 ]; then
+                create_pull_request "${ACR_BRANCH}" "${PULL_REQUEST_BRANCH}"
+            else
+                echo "Could not create PR from ${ACR_BRANCH} into ${PULL_REQUEST_BRANCH}"
+            fi
 
         fi
 
