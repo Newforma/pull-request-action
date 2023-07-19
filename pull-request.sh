@@ -165,7 +165,7 @@ main () {
             # Ensure we have a GitHub token
             check_credentials
 
-            ACR_BRANCH = "acr_develop"
+            ACR_BRANCH="acr_develop"
 
             create_branch_for_pr "${BRANCH}" "${ACR_BRANCH}"
 
