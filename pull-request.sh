@@ -117,13 +117,6 @@ create_pull_request() {
         echo "PR Creation Response: ${RESPONSE}"
     fi
 
-    # Assign the automerge label
-    LABELS="{\"labels\":[\"automerge\"]}"
-    PR_NUMBER=$(echo "${RESPONSE}" | jq --raw-output '.[] | select(.head.ref == "'${SOURCE}'") | .number')
-    LABELS_URL="${REPO_URL}/issues/${PR_NUMBER}/labels"
-
-    curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" -X POST --data "${LABELS}" ${LABELS_URL}
-
 }
 
 
