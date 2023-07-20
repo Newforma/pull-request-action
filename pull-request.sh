@@ -59,7 +59,8 @@ create_branch_for_pr() {
     COMMIT_SHA=$(curl -s -H "${AUTH_HEADER}" "${BRANCHES_URL}/${SOURCE_BRANCH}" | jq -r '.commit.sha')
 
     # create the new branch using the commit hash of the latest commit on the source branch
-    RESPONSE=$(curl -s -w "\nHTTP status code: %{http_code}\n" -X POST -H "${AUTH_HEADER}" "${REPO_URL}/git/refs" -d "{\"ref\":\"refs/heads/${ACR_BRANCH}\",\"sha\":\"${COMMIT_SHA}\"}")
+    DATA="{\"ref\":\"refs/heads/${ACR_BRANCH}\",\"sha\":\"${COMMIT_SHA}\"}"
+    RESPONSE=$(curl -s -w "\nHTTP status code: %{http_code}\n" -X POST -H "${AUTH_HEADER}" "${REPO_URL}/git/refs" --data "${DATA}")
     RESPONSE_BODY=$(echo "${RESPONSE}" | sed '$d')
 
     # check if the response contains any errors
