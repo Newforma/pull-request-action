@@ -59,6 +59,7 @@ create_branch_for_pr() {
     COMMIT_SHA=$(curl -s -H "${AUTH_HEADER}" "${BRANCHES_URL}/${SOURCE_BRANCH}" | jq -r '.commit.sha')
 
     # create the new branch using the commit hash of the latest commit on the source branch
+    echo "Creating new branch ${DEST_BRANCH} from ${SOURCE_BRANCH}..."
     DATA="{\"ref\":\"refs/heads/${DEST_BRANCH}\",\"sha\":\"${COMMIT_SHA}\"}"
     RESPONSE=$(curl -s -w "\nHTTP status code: %{http_code}\n" -X POST -H "${AUTH_HEADER}" "${REPO_URL}/git/refs" --data "${DATA}")
     RESPONSE_BODY=$(echo "${RESPONSE}" | sed '$d')
@@ -109,7 +110,7 @@ create_pull_request() {
     # Option 2: Open a new pull request
     else
         # Post the pull request
-        echo "Creating Pull Request:"
+        echo "Creating Pull Request from ${SOURCE} to ${TARGET}..."
         echo "$CURL_POST_REQUEST"
         DATA="{\"title\":\"${TITLE}\", \"body\":\"${BODY}\", \"base\":\"${TARGET}\", \"head\":\"${SOURCE}\", \"draft\":${DRAFT}}"
         RESPONSE=$(curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" -X POST --data "${DATA}" ${PULLS_URL})
