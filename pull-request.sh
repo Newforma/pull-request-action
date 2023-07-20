@@ -47,31 +47,31 @@ check_events_json() {
 create_branch_for_pr() {
 
     SOURCE_BRANCH="${1}"
-    ACR_BRANCH="${2}"
+    DEST_BRANCH="${2}"
 
     # check if the new branch already exists
-    BRANCH_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" -H "${AUTH_HEADER}" "${BRANCHES_URL}/${ACR_BRANCH}")
+    BRANCH_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" -H "${AUTH_HEADER}" "${BRANCHES_URL}/${DEST_BRANCH}")
     if [ "${BRANCH_EXISTS}" -eq 200 ]; then
-        echo "Branch ${ACR_BRANCH} already exists."
+        echo "Branch ${DEST_BRANCH} already exists."
         return 0
     fi
 
     COMMIT_SHA=$(curl -s -H "${AUTH_HEADER}" "${BRANCHES_URL}/${SOURCE_BRANCH}" | jq -r '.commit.sha')
 
     # create the new branch using the commit hash of the latest commit on the source branch
-    DATA="{\"ref\":\"refs/heads/${ACR_BRANCH}\",\"sha\":\"${COMMIT_SHA}\"}"
+    DATA="{\"ref\":\"refs/heads/${DEST_BRANCH}\",\"sha\":\"${COMMIT_SHA}\"}"
     RESPONSE=$(curl -s -w "\nHTTP status code: %{http_code}\n" -X POST -H "${AUTH_HEADER}" "${REPO_URL}/git/refs" --data "${DATA}")
     RESPONSE_BODY=$(echo "${RESPONSE}" | sed '$d')
 
     # check if the response contains any errors
     ERRORS=$(echo "${RESPONSE_BODY}" | jq -r '.errors')
     if [ "${ERRORS}" != "null" ]; then
-        echo "Error creating branch ${ACR_BRANCH}:"
+        echo "Error creating branch ${DEST_BRANCH}:"
         echo "${RESPONSE_BODY}"
         return 1
     fi
 
-    echo "New branch ${ACR_BRANCH} created from ${SOURCE_BRANCH}."
+    echo "New branch ${DEST_BRANCH} created from ${SOURCE_BRANCH}."
     return 0
 
 }
