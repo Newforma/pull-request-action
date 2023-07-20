@@ -46,7 +46,7 @@ check_events_json() {
 
 create_branch_for_pr() {
 
-    SOURCE="${1}"
+    SOURCE_BRANCH="${1}"
     ACR_BRANCH="${2}"
 
     # check if the new branch already exists
