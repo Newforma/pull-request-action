@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim
+FROM debian:11.11-slim
 
 # docker build -t vanessa/pull-request-action .
 
